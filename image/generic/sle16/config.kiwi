@@ -47,7 +47,7 @@
         <source path='obsrepositories:/'/>
     </repository>
     <repository type="rpm-md" profiles="Staging">
-        <source path="obs://devel:DMS/SLE_16.1"/>
+        <source path="obs://home:chuller:branches:devel:DMS/SLE_16.1"/>
     </repository>
     <repository type="rpm-md" profiles="Staging">
         <source path="obs://SUSE:SLFO:Products:SLES:16.1/standard"/>
