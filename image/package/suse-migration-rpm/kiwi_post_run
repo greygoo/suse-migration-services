@@ -31,7 +31,16 @@ ARCH="$(uname -m)"
 NAME=$(echo "$IMAGE" | cut -f1 -d.)
 VERSION=$(echo "$IMAGE" | cut -f3 -d-)
 RELEASE=$(echo "$IMAGE" | sed -e "s@-Staging@@" | sed -e "s@-Production@@" | cut -f4 -d- | sed -e "s@Build@@" | sed -e 's@.iso$@@')
-PRODUCT='product(SLES) >= %{MinSLEVersion}'
+# SLE16 images install on SLE15 SP4+ or Leap 16+, which have rpm >= 4.14 and
+# parse boolean dependencies. SLE15 images install on SLE12, which has rpm 4.11.
+case "$NAME" in
+    SLES16*)
+        PRODUCT='(product(SLES) >= %{MinSLEVersion} or product(Leap) >= 16.0)'
+        ;;
+    *)
+        PRODUCT='product(SLES) >= %{MinSLEVersion}'
+        ;;
+esac
 
 # SAP product check
 if echo "$NAME" | grep -q SAP_; then
