@@ -23,6 +23,11 @@ class TestDefaults(object):
     def test_get_grub_default_file(self):
         assert self.defaults.get_grub_default_file() == '/system-root/etc/default/grub'
 
+    def test_get_selinux_autorelabel_file(self):
+        assert (
+            self.defaults.get_selinux_autorelabel_file() == '/system-root/etc/selinux/.autorelabel'
+        )
+
     def test_get_target_kernel(self):
         with patch('platform.machine') as mock_platform_machine:
             mock_platform_machine.return_value = 'x86_64'

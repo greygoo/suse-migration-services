@@ -168,6 +168,12 @@ class Defaults:
         return os.path.normpath(os.sep.join([Defaults.get_system_root_path(), '/etc/default/grub']))
 
     @staticmethod
+    def get_selinux_autorelabel_file():
+        return os.path.normpath(
+            os.sep.join([Defaults.get_system_root_path(), '/etc/selinux/.autorelabel'])
+        )
+
+    @staticmethod
     def update_env(preserve_info):
         """
         Update runtime environment with preserve_info dict
