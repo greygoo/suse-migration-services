@@ -17,7 +17,9 @@
 #
 import logging
 import fileinput
+import os
 import re
+from pathlib import Path
 
 # project
 from suse_migration_services.defaults import Defaults
@@ -76,6 +78,15 @@ class ApparmorToSelinux(DropComponents):
                     chroot=self.root_path,
                 )
                 zypper_call.log_if_failed(self.log)
+
+            # rpm labels files from the policy loaded in the running kernel.
+            # The live system has none, so everything the migration wrote is
+            # unlabelled. Schedule a relabel on first boot of the migrated
+            # system; the initrd acts on the marker before switch-root.
+            autorelabel_file = Defaults.get_selinux_autorelabel_file()
+            if os.path.isdir(os.path.dirname(autorelabel_file)):
+                self.log.info('Scheduling SELinux relabel on next boot')
+                Path(autorelabel_file).touch()
         except Exception as issue:
             message = 'Apparmor to SELinux migration failed with {0}'.format(issue)
             self.log.error(message)
