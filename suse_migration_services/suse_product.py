@@ -28,8 +28,7 @@ from suse_migration_services.exceptions import DistMigrationSUSEBaseProductExcep
 class SUSEBaseProduct:
     def __init__(self, log):
         self.log = log
-        root_path = Defaults.get_system_root_path()
-        self.products_metadata = os.sep.join([root_path, 'etc', 'products.d'])
+        self.products_metadata = os.sep.join([self.get_root_path(), 'etc', 'products.d'])
         self.prod_filenames = glob.glob(os.path.join(self.products_metadata, '*.prod'))
         base_product_files = []
         xml = ElementTree()
@@ -58,6 +57,11 @@ class SUSEBaseProduct:
             raise DistMigrationSUSEBaseProductException(message)
 
         self.base_product = base_product_files[0]
+
+    @staticmethod
+    def get_root_path():
+        """Root of the system the product metadata is read from."""
+        return Defaults.get_system_root_path()
 
     def delete_target_registration(self):
         self.backup_products_metadata()
@@ -106,10 +110,17 @@ class SUSEBaseProduct:
             )
 
     def get_product_name(self):
-        """Get the product name to be migrated to."""
+        """
+        Get the product name to be migrated to.
+
+        The name is read from the base product of the migration image,
+        which ships the release package of the product to migrate to.
+        The system to migrate does not provide it. The architecture is
+        read from the system to migrate, migrations do not change it.
+        """
         migration_product_name = None
         try:
-            name = self.get_tag('name')[0]
+            name = MigrationImageProduct(self.log).get_tag('name')[0]
             arch = self.get_tag('arch')[0]
             if name and arch:
                 migration_product_name = '/'.join([name, self.get_default_target_version(), arch])
@@ -120,3 +131,11 @@ class SUSEBaseProduct:
 
     def get_default_target_version(self):
         return Defaults.get_os_release().version_id
+
+
+class MigrationImageProduct(SUSEBaseProduct):
+    """Base product of the migration image, the product to migrate to."""
+
+    @staticmethod
+    def get_root_path():
+        return Defaults.get_migration_image_root_path()
