@@ -46,6 +46,7 @@ BuildRequires:    %{pythons}-pip
 BuildRequires:    %{pythons}-wheel
 %endif
 BuildRequires:    systemd-rpm-macros
+Requires:         %{pythons}-base
 Requires:         %{pythons}-Cerberus
 Requires:         %{pythons}-PyYAML
 Requires:         %{pythons}-setuptools
