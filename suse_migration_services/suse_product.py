@@ -26,9 +26,10 @@ from suse_migration_services.exceptions import DistMigrationSUSEBaseProductExcep
 
 
 class SUSEBaseProduct:
-    def __init__(self, log):
+    def __init__(self, log, root_path=None):
         self.log = log
-        root_path = Defaults.get_system_root_path()
+        if root_path is None:
+            root_path = Defaults.get_system_root_path()
         self.products_metadata = os.sep.join([root_path, 'etc', 'products.d'])
         self.prod_filenames = glob.glob(os.path.join(self.products_metadata, '*.prod'))
         base_product_files = []
@@ -106,10 +107,20 @@ class SUSEBaseProduct:
             )
 
     def get_product_name(self):
-        """Get the product name to be migrated to."""
+        """
+        Get the product name to be migrated to.
+
+        The name is read from the base product of the migration image,
+        which ships the release package of the product to migrate to.
+        The system to migrate does not provide it. The architecture is
+        read from the system to migrate, migrations do not change it.
+        """
         migration_product_name = None
         try:
-            name = self.get_tag('name')[0]
+            migration_image_product = SUSEBaseProduct(
+                self.log, Defaults.get_migration_image_root_path()
+            )
+            name = migration_image_product.get_tag('name')[0]
             arch = self.get_tag('arch')[0]
             if name and arch:
                 migration_product_name = '/'.join([name, self.get_default_target_version(), arch])
